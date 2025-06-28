@@ -1,0 +1,51 @@
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.site-header .container {
+  max-width: 1200px;
+  margin: 0 110px;
+  padding: 0 20px;
+  align-items: center;
+  gap: 100px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.logo a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo .pink {
+  color: #ff8282;
+}
+
+.main-nav {
+  margin-bottom: 10px;
+}
+
+.main-nav ul {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+}
+
+.main-nav a {
+  text-decoration: none;
+  color: #6c7a89;
+  font-size: 16px;
+  transition: color 0.2s ease;
+}
+
+.main-nav a:hover {
+  color: black;
+  font-weight: 600;
+}
