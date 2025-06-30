@@ -1,12 +1,12 @@
 /*
 Theme Name: theme_1
 Author: Ahrim
-Description: 첫 워드프레스 테마
+Description: 워드프레스 테마
 Version: 1.0
 */
 /* http://localhost/wordpress/wp-admin/ */
 
-/* 메인화면 */
+/* 에디터 */
 .section-title {
   margin: 20px 130px;
   font-size: 30px;
