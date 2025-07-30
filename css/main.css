@@ -7,6 +7,10 @@ Version: 1.0
 /* http://localhost/wordpress/wp-admin/ */
 
 /* 에디터 */
+* {
+  box-sizing: border-box;
+}
+
 .section-title {
   margin: 20px 130px;
   font-size: 30px;
@@ -54,7 +58,6 @@ Version: 1.0
   border-radius: 12px;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
   padding: 20px;
-  box-sizing: border-box;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -62,14 +65,11 @@ Version: 1.0
 }
 
 .book-front {
-  position: relative;
   z-index: 2;
 }
-
 .book-back {
   transform: rotateY(180deg);
   padding: 10px;
-  box-sizing: border-box;
 }
 
 .book-thumb img {
@@ -104,38 +104,79 @@ Version: 1.0
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 25px;
+  bottom: -18px;
   font-size: 14px;
   color: #7d7d7d;
   margin: 5px;
-  white-space: nowrap;
 }
 
 .book-meta p {
   margin: 0;
 }
 
-/* 베스트셀러 */
+@media (max-width: 1200px) {
+  .book-grid {
+    grid-template-columns: repeat(3, 1fr);
+    margin: 80px 60px;
+  }
+}
 
-.bestseller-wrapper {
+@media (max-width: 1024px) {
+  .book-grid {
+    grid-template-columns: repeat(2, 1fr);
+    margin: 60px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .book-card.touched .book-inner {
+    transform: rotateY(180deg) !important;
+  }
+  .book-inner {
+    transform-style: preserve-3d;
+    transition: transform 0.8s;
+    position: relative;
+  }
+  .book-front,
+  .book-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 12px;
+    background: #f6f7fb;
+  }
+  .book-front {
+    z-index: 2;
+  }
+  .book-back {
+    transform: rotateY(180deg);
+    z-index: 1;
+  }
+}
+
+/* 베스트셀러 */
+.bestseller-page .bestseller-wrapper {
   display: flex;
   gap: 150px;
   margin-top: 40px;
   padding: 0 130px;
+  box-sizing: border-box;
 }
 
-.bestseller-sidebar {
+.bestseller-page .bestseller-sidebar {
   width: 200px;
-  height: fit-content;
   background: #f9f9f9;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 20px;
   font-family: "Segoe UI", sans-serif;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: fit-content;
 }
 
-.bestseller-sidebar h3 {
+.bestseller-page .bestseller-sidebar h3 {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 20px;
@@ -145,17 +186,17 @@ Version: 1.0
   padding-left: 8px;
 }
 
-.sidebar-menu {
+.bestseller-page .sidebar-menu {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.sidebar-menu li {
+.bestseller-page .sidebar-menu li {
   margin-bottom: 12px;
 }
 
-.sidebar-menu li a {
+.bestseller-page .sidebar-menu li a {
   display: block;
   text-decoration: none;
   color: #444;
@@ -164,7 +205,7 @@ Version: 1.0
   transition: background 0.1s, color 0.1s;
 }
 
-.sidebar-menu li a:hover {
+.bestseller-page .sidebar-menu li a:hover {
   background: #ffebeb;
   color: #d93025;
   font-weight: 500;
@@ -202,7 +243,7 @@ Version: 1.0
   top: -10px;
   left: -10px;
   background: #2a9d9d;
-  color: white;
+  color: #fff;
   font-size: 13px;
   padding: 4px 10px;
   border-radius: 12px;
@@ -258,12 +299,12 @@ Version: 1.0
 
 .bestseller-page .book-actions .btn-cart {
   background: #767676;
-  color: white;
+  color: #fff;
   padding: 8px 16px;
   border-radius: 4px;
   text-decoration: none;
   font-size: 14px;
-  transition: background 0.1s ease;
+  transition: background 0.1s;
 }
 
 .bestseller-page .book-actions .btn-cart:hover {
@@ -272,14 +313,443 @@ Version: 1.0
 
 .bestseller-page .book-actions .btn-buy {
   background: #ff6363;
-  color: white;
+  color: #fff;
   padding: 8px 16px;
   border-radius: 4px;
   text-decoration: none;
   font-size: 14px;
-  transition: background 0.1s ease;
+  transition: background 0.1s;
 }
 
 .bestseller-page .book-actions .btn-buy:hover {
   background: #e55a5a;
+}
+
+@media (max-width: 1024px) {
+  .bestseller-page .section-title,
+  .bestseller-page .section-desc {
+    margin: 10px 30px;
+  }
+
+  .bestseller-page .bestseller-wrapper {
+    flex-direction: column;
+    padding: 0 40px;
+    gap: 40px;
+  }
+
+  .bestseller-page .bestseller-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .bestseller-page .bestseller-info {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bestseller-page .book-actions {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .bestseller-page .bestseller-thumb {
+    width: 120px;
+  }
+
+  .bestseller-page .best-book-title {
+    font-size: 18px;
+  }
+
+  .bestseller-page .best-book-desc {
+    font-size: 14px;
+  }
+
+  .bestseller-page .book-actions .btn-cart,
+  .bestseller-page .book-actions .btn-buy {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+
+  .bestseller-page .bestseller-wrapper {
+    padding: 0 20px;
+  }
+
+  .bestseller-page .bestseller-sidebar {
+    display: none;
+  }
+}
+
+/* 신상품 전체 */
+.newbooks-hero {
+  background: linear-gradient(135deg, #fffaf4, #fff0f5);
+  padding: 100px 0;
+  text-align: center;
+  font-family: "Segoe UI", sans-serif;
+}
+.hero-inner h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: #333;
+}
+.hero-inner p {
+  font-size: 18px;
+  color: #777;
+  margin-bottom: 30px;
+}
+.btn-hero {
+  display: inline-block;
+  background: #d93025;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.btn-hero:hover {
+  background: #b6261e;
+}
+
+.highlighted-newbook {
+  padding: 80px 130px;
+  background: #fff8f5;
+}
+.highlighted-wrapper {
+  display: flex;
+  gap: 60px;
+  align-items: center;
+}
+.highlighted-left {
+  position: relative;
+}
+.highlighted-left img {
+  width: 320px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+.highlighted-badge {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  background: #ff5252;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+.highlighted-right {
+  flex: 1;
+}
+.highlighted-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.highlighted-meta {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 16px;
+}
+.highlighted-desc {
+  font-size: 16px;
+  color: #444;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+.btn-highlighted {
+  display: inline-block;
+  background: #02137f;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+.btn-highlighted:hover {
+  background: #1e2a38;
+}
+
+.book_intro,
+.author_comment {
+  color: #1a1a1a;
+  margin: 20px 0;
+}
+.book_intro {
+  font-size: 20px;
+  font-weight: 600;
+}
+.author_comment {
+  font-size: 17px;
+}
+.highlighted-quote {
+  font-size: 16px;
+  font-style: italic;
+  color: #333;
+  border-left: 3px solid #aaa;
+  padding-left: 16px;
+  margin: 24px 0;
+}
+
+/* 신상품 목록 그리드 */
+.newbooks-grid-section {
+  padding: 80px 130px 100px;
+}
+.grid-title {
+  font-size: 22px;
+  margin-bottom: 30px;
+  color: #333;
+}
+.book-info-block {
+  width: 800px;
+  height: auto;
+}
+
+.newbooks-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 50px 30px;
+}
+.newbook-card {
+  display: flex;
+  gap: 85px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  align-items: center;
+  transition: transform 0.2s;
+}
+.newbook-card:hover {
+  transform: translateY(-5px);
+}
+.newbook-thumb {
+  position: relative;
+}
+.newbook-thumb img {
+  width: 200px;
+  height: auto;
+  border-radius: 6px;
+}
+.new-badge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  background: #ff6363;
+  color: #fff;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 14px;
+}
+.newbook-info h4 {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.newbook-info .meta {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 4px;
+}
+.read-more {
+  font-size: 14px;
+  color: #d93025;
+  text-decoration: none;
+}
+.read-more:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .highlighted-newbook {
+    padding: 40px 20px;
+  }
+  .highlighted-wrapper {
+    flex-direction: column;
+    gap: 30px;
+  }
+  .highlighted-left img {
+    width: 100%;
+    max-width: 280px;
+  }
+  .highlighted-right {
+    text-align: center;
+  }
+  .book-info-block {
+    width: 100%;
+  }
+  .newbooks-grid-section {
+    padding: 60px 20px;
+  }
+  .newbooks-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .newbook-card {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  .newbook-thumb img {
+    width: 100%;
+    max-width: 220px;
+    margin: 0 auto;
+  }
+}
+
+/* 이달의 특가 */
+.discount-page {
+  margin: 60px 130px;
+}
+
+.discount-page .section-title {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.discount-page .book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  margin-top: 30px;
+}
+
+.discount-page .book-card {
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+}
+
+.discount-page .book-title {
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+.book-pricing .original-price {
+  text-decoration: line-through;
+  color: #888;
+  margin-right: 6px;
+}
+
+.book-pricing .discount-price {
+  font-weight: bold;
+  color: #e63946;
+}
+
+.btn-buy {
+  display: inline-block;
+  margin-top: 10px;
+  background: #1e2a38;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.btn-buy:hover {
+  background: #151f2b;
+}
+
+/* 이달의 특가*/
+.discount-page {
+  margin: 0;
+}
+
+.book-section h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+.book-section p {
+  color: #777;
+  margin-bottom: 40px;
+}
+
+.discount-page .discount-list {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.discount-page .discount-item {
+  display: flex;
+  gap: 30px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+  align-items: center;
+  position: relative;
+}
+
+.discount-page .discount-thumb {
+  width: 150px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.discount-page .discount-info {
+  flex: 1;
+  position: relative;
+}
+
+.discount-page .discount-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #2a9d8f;
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.discount-page .book-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.discount-page .book-price {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+.discount-page .book-price .sale {
+  color: #e63946;
+  font-weight: bold;
+  margin-right: 10px;
+}
+.discount-page .book-price .price {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.discount-page .book-excerpt {
+  font-size: 14px;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .discount-page .discount-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .discount-page .discount-thumb {
+    width: 100%;
+  }
+  .discount-page .discount-badge {
+    top: auto;
+    bottom: 10px;
+    right: 10px;
+  }
 }
