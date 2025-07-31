@@ -122,6 +122,11 @@ Version: 1.0
 }
 
 @media (max-width: 1024px) {
+  .section-title,
+  .section-desc {
+    margin: 10px 30px 20px 30px;
+  }
+
   .book-grid {
     grid-template-columns: repeat(2, 1fr);
     margin: 60px 40px;
@@ -132,6 +137,13 @@ Version: 1.0
   .book-card.touched .book-inner {
     transform: rotateY(180deg) !important;
   }
+
+  .book-grid {
+    grid-template-columns: 1fr !important;
+    margin: 20px 16px !important;
+    gap: 65px !important;
+  }
+
   .book-inner {
     transform-style: preserve-3d;
     transition: transform 0.8s;
