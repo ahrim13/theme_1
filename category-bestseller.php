@@ -92,7 +92,15 @@
                     );
                   ?>
                   <a href="<?php echo esc_url($add_url); ?>" class="btn-cart">장바구니</a>
-                  <a href="<?php the_permalink(); ?>" class="btn-buy">바로구매</a>
+                  
+                      <?php 
+                        $buy_url = wp_nonce_url(
+                          admin_url('admin-post.php?action=book_cart_buy_now&book_id=' . get_the_ID() . '&qty=1'),
+                          'book_cart',
+                          'cart_nonce'
+                        );
+                      ?>
+                  <a href="<?php echo esc_url($buy_url); ?>" class="btn-buy">바로구매</a>
                 </div>
               </div>
             </article>

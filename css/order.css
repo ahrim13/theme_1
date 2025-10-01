@@ -1,0 +1,336 @@
+.order-page,
+.order-page * {
+  box-sizing: border-box;
+}
+.order-page {
+  padding: 28px 0 64px;
+}
+.order-page h1 {
+  font-size: 28px;
+  margin: 0 0 20px;
+}
+.order-page .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.checkout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* 왼쪽 카드 스택 */
+.left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* 오른쪽 요약 고정 */
+.right-col {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+}
+
+/* ===== 카드 ===== */
+.card {
+  background: #fff;
+  border: 1px solid #e9e9e9;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  padding: 18px 20px;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.muted {
+  color: #888;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+/* ===== 폼 ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px 14px;
+}
+.form-grid > label,
+label.full {
+  display: block;
+  font-size: 13px;
+  color: #333;
+  min-width: 0;
+}
+.form-grid input,
+label.full input {
+  margin-top: 8px;
+  width: 100%;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.15s border-color ease, 0.15s box-shadow ease;
+  background: #fff;
+}
+.form-grid input:focus,
+label.full input:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+}
+label.full {
+  grid-column: 1 / -1;
+}
+.mt12 {
+  margin-top: 12px;
+}
+
+#postcode[readonly],
+#road_address[readonly],
+#jibun_address[readonly] {
+  background: #fafafa;
+}
+
+/* ===== 공동현관 ===== */
+.entrance .label {
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 8px;
+}
+.entrance .radio {
+  margin-right: 14px;
+  font-size: 13px;
+  color: #333;
+}
+.entrance .pin-wrap {
+  margin-top: 8px;
+}
+.entrance .pin-wrap input {
+  width: 260px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* ===== 주문상품 리스트 ===== */
+.item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.item-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 120px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.item-row:last-child {
+  border-bottom: 0;
+}
+
+.thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  aspect-ratio: 3/4;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.item-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.item-meta {
+  min-width: 0;
+}
+.item-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 600;
+  color: #111;
+  text-decoration: none;
+}
+.item-sub {
+  margin-top: 6px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+  color: #555;
+}
+.price em.sale {
+  font-style: normal;
+  font-weight: 700;
+}
+.price s.regular {
+  color: #aaa;
+  margin-left: 6px;
+}
+.item-line {
+  text-align: right;
+  font-weight: 700;
+}
+
+/* ===== 요약 패널 ===== */
+.section-summary .price-rows {
+  margin: 6px 0 10px;
+}
+.section-summary .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px dashed #efefef;
+}
+.section-summary .row:last-child {
+  border-bottom: 0;
+}
+.section-summary dt {
+  color: #555;
+}
+.section-summary dd {
+  margin: 0;
+}
+.section-summary .row.minus dd {
+  color: #d14;
+}
+.section-summary .row.total {
+  padding-top: 12px;
+  border-top: 2px solid #eee;
+  border-bottom: 0;
+}
+.section-summary .row.total dt,
+.section-summary .row.total dd {
+  font-weight: 800;
+  color: #111;
+}
+
+.agreements {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+.check {
+  font-size: 13px;
+  color: #333;
+}
+
+.order-submit.stack {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+.btn-primary,
+.btn-secondary {
+  display: inline-block;
+  text-align: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 15px;
+  line-height: 1;
+  user-select: none;
+  cursor: pointer;
+  border: 0;
+  transition: transform 0.08s ease, background 0.15s ease, opacity 0.15s ease;
+}
+.btn-primary {
+  background: #ff8282;
+  color: #fff;
+  font-weight: 700;
+}
+.btn-primary:hover {
+  opacity: 0.95;
+}
+.btn-primary:active {
+  transform: translateY(1px);
+}
+.btn-secondary {
+  background: #eee;
+  color: #111;
+}
+.btn-secondary:hover {
+  background: #e6e6e6;
+}
+.btn-secondary:active {
+  transform: translateY(1px);
+}
+
+/* ===== 카카오 우편번호 레이어/닫기 버튼 ===== */
+#postcode-layer {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding-top: 48px;
+}
+
+#postcode-layer-close {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  font-size: 18px;
+  z-index: 2;
+}
+#postcode-layer-close:hover {
+  background: #333;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 1100px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+  .right-col {
+    position: static;
+  }
+}
+@media (max-width: 520px) {
+  .item-row {
+    grid-template-columns: 56px minmax(0, 1fr) 96px;
+    gap: 10px;
+  }
+  .thumb {
+    width: 56px;
+  }
+  .btn-primary,
+  .btn-secondary {
+    font-size: 14px;
+    padding: 11px 14px;
+  }
+}

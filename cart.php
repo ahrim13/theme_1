@@ -17,13 +17,17 @@ $total = 0;
     <?php else : ?>
       <table class="cart-table">
         <colgroup>
+          <col style="width:48px">
           <col class="col-item">
-          <col class="col-qty">
-          <col class="col-subtotal">
+          <col class="col-qty" style="width:160px">
+          <col class="col-subtotal" style="width:140px">
         </colgroup>
 
         <thead>
           <tr>
+            <th>
+              <input type="checkbox" id="select-all" />
+            </th>
             <th>도서</th>
             <th>수량</th>
             <th>소계</th>
@@ -49,16 +53,19 @@ $total = 0;
             );
           ?>
             <tr>
+              <td class="td-check">
+                <input type="checkbox" class="row-check"
+                  name="selected[]"
+                  value="<?php echo (int)$book_id; ?>"
+                  form="cart-select-form" />
+              </td>
+
               <td class="cart-item">
                 <a href="<?php echo get_permalink($book_id); ?>" class="thumb-wrap"><?php echo $thumb ?: ''; ?></a>
-
                 <div class="cart-item-meta">
-                  <a class="cart-item-title" href="<?php echo get_permalink($book_id); ?>">
-                    <?php echo esc_html($title); ?>
-                  </a>
+                  <a class="cart-item-title" href="<?php echo get_permalink($book_id); ?>"><?php echo esc_html($title); ?></a>
                   <div class="unit-price"><?php echo number_format($per); ?>원</div>
                 </div>
-
                 <a href="<?php echo esc_url($remove_url); ?>" class="item-remove" aria-label="삭제">×</a>
               </td>
 
@@ -98,11 +105,36 @@ $total = 0;
             <span class="total-label">합계</span>
             <strong class="total-amount"><?php echo number_format($total); ?>원</strong>
           </div>
-          <a class="btn-checkout" href="#" aria-disabled="true">결제하기(데모)</a>
+
+          <div class="cart-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
+            <form id="cart-select-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+              <input type="hidden" name="action" value="cart_order_selected">
+              <?php wp_nonce_field('cart_order', 'order_nonce'); ?>
+              <button type="submit" class="btn-checkout">선택주문</button>
+            </form>
+
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+              <input type="hidden" name="action" value="cart_order_all">
+              <?php wp_nonce_field('cart_order_all', 'order_all_nonce'); ?>
+              <button type="submit" class="btn-checkout">전체주문</button>
+            </form>
+          </div>
         </div>
       </div>
     <?php endif; ?>
   </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const master = document.getElementById('select-all');
+  const checks = document.querySelectorAll('.row-check');
+  if (master) {
+    master.addEventListener('change', function () {
+      checks.forEach(c => { c.checked = master.checked; });
+    });
+  }
+});
+</script>
 
 <?php get_footer(); ?>
