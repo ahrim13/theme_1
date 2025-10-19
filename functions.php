@@ -11,15 +11,15 @@
  * 08. 주문 검색(책 제목)
  */
 
-if (!defined('ABSPATH')) exit; 
+if (!defined('ABSPATH')) exit;
 
-/* 
+/*
  * 00. 기본 설정/공통
  * - 썸네일 사용
  * - 도서 포스트 타입 등록(book)
  * - 베스트셀러 순위 메타박스
  */
-add_theme_support('post-thumbnails');
+add_theme_support('post-thumbnails'); // 썸네일 기능 활성화
 
 // 책(도서) 포스트 타입 등록
 function register_book_post_type() {
@@ -35,30 +35,57 @@ function register_book_post_type() {
 add_action('init', 'register_book_post_type');
 
 // 베스트셀러 순위 메타박스 (book/post 공용)
-function arim_add_bestseller_rank_meta_box() {
+function add_bestseller_rank_meta_box() {
   add_meta_box(
     'bestseller_rank_meta',
     '베스트셀러 순위',
-    'arim_bestseller_rank_callback',
+    'bestseller_rank_callback',
     ['book', 'post'],
     'side',
     'default'
   );
 }
-add_action('add_meta_boxes', 'arim_add_bestseller_rank_meta_box');
+add_action('add_meta_boxes', 'add_bestseller_rank_meta_box');
 
-function arim_bestseller_rank_callback($post) {
+// 책 편집할 때 오른쪽에 뜨는 순위 입력칸을 만들어주는 롤백
+function bestseller_rank_callback($post) {
+  // 저장값 로드 (둘 중 하나라도 있으면 표시)
   $value = get_post_meta($post->ID, '_bestseller_rank', true);
+  if ($value === '' || $value === null) {
+    $value = get_post_meta($post->ID, 'bestseller_rank', true);
+  }
+
+  // 저장 시 검증용 nonce
+  wp_nonce_field('bestseller_rank_meta_save', 'bestseller_rank_meta_nonce');
+
   echo '<label for="bestseller_rank">1부터 순위를 입력하세요</label>';
-  echo '<input type="number" name="bestseller_rank" id="bestseller_rank" value="' . esc_attr($value) . '" style="width:100%; margin-top:8px;">';
+  echo '<input type="number" name="bestseller_rank" id="bestseller_rank" value="' . esc_attr($value) . '" min="1" style="width:100%; margin-top:8px;">';
 }
 
-function arim_save_bestseller_rank($post_id) {
-  if (array_key_exists('bestseller_rank', $_POST)) {
-    update_post_meta($post_id, '_bestseller_rank', intval($_POST['bestseller_rank']));
+// 베스트셀러 순위 메타박스 저장
+function save_bestseller_rank($post_id) {
+  // 자동저장/리비전 패스
+  if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+  if (wp_is_post_revision($post_id)) return;
+
+  // 권한 체크
+  if (!current_user_can('edit_post', $post_id)) return;
+
+  // nonce 검증
+  if (!isset($_POST['bestseller_rank_meta_nonce']) || !wp_verify_nonce($_POST['bestseller_rank_meta_nonce'], 'bestseller_rank_meta_save')) {
+    return;
   }
+
+  if (!array_key_exists('bestseller_rank', $_POST)) return;
+
+  $rank = (int) $_POST['bestseller_rank'];
+  $store = $rank > 0 ? $rank : '';
+
+  // ACF/쿼리 호환을 위해 두 키 모두 업데이트
+  update_post_meta($post_id, '_bestseller_rank', $store);
+  update_post_meta($post_id, 'bestseller_rank',  $store);
 }
-add_action('save_post', 'arim_save_bestseller_rank');
+add_action('save_post', 'save_bestseller_rank'); // 글이 저장될 때마다 위 로직 자동 실행
 
 
 /*
@@ -211,7 +238,7 @@ function get_order_url() {
 }
 
 
-/* 
+/*
  * 05. 장바구니(세션/유틸/액션)
  * - 세션 구조: $_SESSION['cart'] = [ book_id => qty, ... ]
 */
@@ -308,7 +335,7 @@ add_action('admin_post_nopriv_book_cart_empty', 'book_cart_empty_action');
 add_action('admin_post_book_cart_empty', 'book_cart_empty_action');
 
 
-/* 
+/*
  * 06. 주문 이동(선택/전체/바로구매) — 세션 order_items
  * - 세션 구조: $_SESSION['order_items'] = [ book_id => qty, ... ]
  */
@@ -363,7 +390,7 @@ add_action('admin_post_nopriv_book_cart_buy_now', 'book_cart_buy_now_action');
 add_action('admin_post_book_cart_buy_now', 'book_cart_buy_now_action');
 
 
-/* 
+/*
  * 07. 주문 생성/조회 헬퍼
  * - shop_order 생성/메타 저장
  * - 세션 last_order_id, my_orders[] 관리
