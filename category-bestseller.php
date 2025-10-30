@@ -31,7 +31,7 @@
             'no_found_rows'       => true,
           ]);
 
-          // 순위가 지정되지 않은 베스트셀러(즉, rank 값이 없는 글) 불러오기
+          // 순위가 지정되지 않은 베스트셀러(rank 값이 없는 글) 불러오기
           $unranked_q = new WP_Query([
             'post_type'      => 'book',
             'posts_per_page' => -1,
@@ -45,7 +45,7 @@
             'meta_query'     => [
               'relation' => 'OR',
               [ 'key' => 'bestseller_rank', 'compare' => 'NOT EXISTS' ], //bestseller_rank라는 메타 필드 자체가 존재하지 않는 책
-              [ 'key' => 'bestseller_rank', 'value' => '', 'compare' => '=' ], //필드는 있는데, 값이 비어 있는 책
+              [ 'key' => 'bestseller_rank', 'value' => '', 'compare' => '=' ], //필드는 있는데 값이 비어 있는 책
             ],
             'ignore_sticky_posts' => 1,
             'no_found_rows'       => true,

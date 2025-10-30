@@ -1,28 +1,56 @@
 <?php
+if (!session_id()) { session_start(); }
+
+/*강제 로그 설정 (임시 디버깅용)*/
+@ini_set('log_errors', '1');
+@ini_set('error_reporting', E_ALL);
+/* 우선 wp-content/order-debug.log 로 시도 */
+@ini_set('error_log', ABSPATH . 'wp-content/order-debug.log');
+error_log('[ORDER] bootstrap ' . date('c'));
+/* wp-content에 못 쓸 때(권한/경로 문제) 대비한 2차 경로: 시스템 임시폴더 */
+if (!file_exists(ABSPATH . 'wp-content/order-debug.log')) {
+  $fallback = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'order-debug.log';
+  @ini_set('error_log', $fallback);
+  error_log('[ORDER] fallback logging to ' . $fallback);
+}
+/* 강제 로그 설정 끝 */
+
 /**
  * Template Name: Order
  */
 
-// 장바구니 / 선택주문 데이터 가져오기
-// 장바구니 세션(book_cart_get)이랑 선택주문(order_items_get) 두 가지 중에 어떤 걸 쓸지 결정하는 구간
+/**
+ *  장바구니/선택주문 소스 결정
+ *  - 선택주문 세션(order_items)이 있으면 우선 사용
+ *  - 둘 다 비면(주문할 게 없으면) GET 요청에서만 장바구니로 돌려보냄
+ *    (POST일 때는 디버깅/검증 위해 그대로 진행)
+ *-*/
+$cart_session = function_exists('book_cart_get')  ? book_cart_get()  : [];
+$order_set    = function_exists('order_items_get')? order_items_get(): [];
+$cart_source  = !empty($order_set) ? $order_set : $cart_session;
 
-// 장바구니에 담긴 전체 항목 (세션에서 불러옴)
-$cart_session = function_exists('book_cart_get') ? book_cart_get() : [];
-// 주문서에서 선택된 상품 세트 (선택 주문 시 별도로 저장됨)
-$order_set = function_exists('order_items_get') ? order_items_get() : [];
-// 만약 선택 주문이 있으면 그걸 우선 사용하고 없으면 기본 장바구니 사용
-$cart_source = !empty($order_set) ? $order_set : $cart_session;
-// 만약 두 곳 다 비어있다면 (주문할 상품이 전혀 없을 때)
-if (empty($cart_source)) {
-  // 장바구니 페이지로 다시 보내기
-  wp_safe_redirect(home_url('/cart/'));
-  exit; 
+/* 진입 상황 로깅 */
+error_log('[ORDER] method=' . ($_SERVER['REQUEST_METHOD'] ?? ''));
+error_log('[ORDER] sid=' . session_id());
+error_log('[ORDER] cart_count=' . (is_array($cart_session)?count($cart_session):0));
+error_log('[ORDER] order_items_count=' . (is_array($order_set)?count($order_set):0));
+
+if (empty($cart_source) && ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+  wp_safe_redirect( home_url('/cart/') );
+  exit;
 }
 
-// 주문 제출 처리
-if ('POST' === $_SERVER['REQUEST_METHOD']
-    && isset($_POST['order_nonce'])
-    && wp_verify_nonce($_POST['order_nonce'], 'order_submit')) {
+/**
+ *  주문 제출 처리
+ *-*/
+if ( ('POST' === ($_SERVER['REQUEST_METHOD'] ?? 'GET'))
+     && isset($_POST['order_nonce'])
+     && wp_verify_nonce($_POST['order_nonce'], 'order_submit') ) {
+
+  error_log('[ORDER] POST in — nonce=Y');
+  error_log('[ORDER] verify=OK');
+  error_log('[ORDER] cart_source_count=' . count($cart_source));
+  error_log('[ORDER] will_call_shop_order_create=' . (function_exists('shop_order_create')?'Y':'N'));
 
   // 합계 계산
   $subtotal = 0; $discount_total = 0; $shipping_fee = 0; $coupon_discount = 0; $point_use = 0;
@@ -59,38 +87,54 @@ if ('POST' === $_SERVER['REQUEST_METHOD']
       'customer' => $customer,
       'items'    => array_map('intval', $cart_source),
       'amounts'  => [
-        'subtotal' => $subtotal,
-        'discount' => $discount_total,
-        'shipping' => $shipping_fee,
-        'coupon'   => $coupon_discount,
-        'points'   => $point_use,
-        'total'    => $total,
+        'subtotal'       => $subtotal,
+        'discount_total' => $discount_total,
+        'shipping'       => $shipping_fee,
+        'coupon'         => $coupon_discount,
+        'points'         => $point_use,
+        'total'          => $total,
       ],
     ]);
   }
 
+  // 생성 직후 로그
+  error_log('[ORDER] created order_id=' . (int)$order_id);
+
   // 선택/바로구매 세트 정리
   if (function_exists('order_items_clear')) { order_items_clear(); }
 
-  // 완료 페이지로 이동(실제 퍼머링크 기반)
-  $complete_page = get_page_by_path('order-complete');
-  $complete_url  = $complete_page ? get_permalink($complete_page->ID)
-                                  : home_url(trailingslashit('order-complete'));
+  // 완료 페이지 URL
+  $complete     = get_page_by_path('order-complete');
+  $complete_url = $complete ? get_permalink($complete->ID) : home_url('/order-complete/');
   if (!empty($order_id)) {
-    $complete_url = add_query_arg('order_id', (int) $order_id, $complete_url);
+    $complete_url = add_query_arg('order_id', (int)$order_id, $complete_url);
   }
-  wp_redirect($complete_url);
+
+  // 리다이렉트 직전 로그
+  error_log('[ORDER] redirect_to=' . $complete_url);
+
+  // POST → GET 표준 리다이렉트 (캐시/프록시 호환성 ↑)
+  wp_safe_redirect( esc_url_raw($complete_url), 303 );
   exit;
+}
+/* POST 분기 실패한 경우(예: nonce 오류)도 원인 파악 로그 남기기 */
+if (('POST' === ($_SERVER['REQUEST_METHOD'] ?? 'GET')) && empty($_POST['order_nonce'])) {
+  error_log('[ORDER] POST but nonce missing');
+} elseif (('POST' === ($_SERVER['REQUEST_METHOD'] ?? 'GET')) && !wp_verify_nonce($_POST['order_nonce'] ?? '', 'order_submit')) {
+  error_log('[ORDER] POST but verify=FAIL');
 }
 
 get_header();
 
-// 화면 표시용 합계
+/*
+ *  화면 표시용 합계
+ */
 $items_count = 0; $subtotal = 0; $discount_total = 0;
 foreach ($cart_source as $book_id => $qty) {
   $qty = (int)$qty; $items_count += $qty;
   $regular = (float) preg_replace('/[^\d.]/', '', (string) get_field('price', $book_id));
-  $sale    = get_field('discount_price', $book_id); if ($sale === '' || $sale === null) { $sale = get_field('sale_price', $book_id); }
+  $sale    = get_field('discount_price', $book_id);
+  if ($sale === '' || $sale === null) { $sale = get_field('sale_price', $book_id); }
   $sale    = (float) preg_replace('/[^\d.]/', '', (string) $sale);
   $unit    = ($sale > 0 && $sale < $regular) ? $sale : $regular;
   $subtotal += $unit * $qty;
@@ -104,8 +148,9 @@ $grand_total  = max(0, $subtotal + $shipping_fee - $discount_total - $coupon_dis
   <div class="container">
     <h1>주문서</h1>
 
-    <form method="post" action="<?php echo esc_url( get_permalink( get_queried_object_id() ) ); ?>">
+    <form method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
       <?php wp_nonce_field('order_submit', 'order_nonce'); ?>
+      <input type="hidden" name="action" value="place_order">
 
       <div class="checkout-grid">
         <div class="left-col">
@@ -157,7 +202,8 @@ $grand_total  = max(0, $subtotal + $shipping_fee - $discount_total - $coupon_dis
               <?php foreach ($cart_source as $book_id => $qty) :
                 $title = get_the_title($book_id);
                 $per_regular = (float) preg_replace('/[^\d.]/', '', (string) get_field('price', $book_id));
-                $per_sale    = get_field('discount_price', $book_id); if ($per_sale === '' || $per_sale === null) { $per_sale = get_field('sale_price', $book_id); }
+                $per_sale    = get_field('discount_price', $book_id);
+                if ($per_sale === '' || $per_sale === null) { $per_sale = get_field('sale_price', $book_id); }
                 $per_sale    = (float) preg_replace('/[^\d.]/', '', (string) $per_sale);
                 $unit        = ($per_sale > 0 && $per_sale < $per_regular) ? $per_sale : $per_regular;
                 $line        = $unit * (int)$qty;
@@ -195,7 +241,7 @@ $grand_total  = max(0, $subtotal + $shipping_fee - $discount_total - $coupon_dis
               <div class="row minus"><dt>상품 할인</dt><dd>- <?php echo number_format_i18n($discount_total); ?>원</dd></div>
               <div class="row minus"><dt>쿠폰 할인</dt><dd>- <?php echo number_format_i18n($coupon_discount); ?>원</dd></div>
               <div class="row minus"><dt>포인트 사용</dt><dd>- <?php echo number_format_i18n($point_use); ?>원</dd></div>
-              <div class="row total"><dt>최종 결제 금액</dt><dd><?php echo number_format_i18n(max(0, $subtotal + $shipping_fee - $discount_total - $coupon_discount - $point_use)); ?>원</dd></div>
+              <div class="row total"><dt>최종 결제 금액</dt><dd><?php echo number_format_i18n($grand_total); ?>원</dd></div>
             </dl>
 
             <div class="agreements">

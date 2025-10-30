@@ -36,7 +36,7 @@
   align-self: start;
 }
 
-/* ===== 카드 ===== */
+/*  카드  */
 .card {
   background: #fff;
   border: 1px solid #e9e9e9;
@@ -58,7 +58,7 @@
   margin-left: 6px;
 }
 
-/* ===== 폼 ===== */
+/*  폼  */
 .form-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -102,7 +102,7 @@ label.full {
   background: #fafafa;
 }
 
-/* ===== 공동현관 ===== */
+/*  공동현관  */
 .entrance .label {
   font-size: 13px;
   color: #333;
@@ -125,7 +125,7 @@ label.full {
   font-size: 14px;
 }
 
-/* ===== 주문상품 리스트 ===== */
+/*  주문상품 리스트  */
 .item-list {
   list-style: none;
   margin: 0;
@@ -194,7 +194,7 @@ label.full {
   font-weight: 700;
 }
 
-/* ===== 요약 패널 ===== */
+/*  요약 패널  */
 .section-summary .price-rows {
   margin: 6px 0 10px;
 }
@@ -280,7 +280,7 @@ label.full {
   transform: translateY(1px);
 }
 
-/* ===== 카카오 우편번호 레이어/닫기 버튼 ===== */
+/* 카카오 우편번호 레이어/닫기 버튼 */
 #postcode-layer {
   background: #fff;
   border: 1px solid #ddd;
@@ -311,7 +311,7 @@ label.full {
   background: #333;
 }
 
-/* ===== 반응형 ===== */
+/* 반응형 */
 @media (max-width: 1100px) {
   .checkout-grid {
     grid-template-columns: 1fr;

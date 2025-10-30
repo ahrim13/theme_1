@@ -9,6 +9,7 @@
  * 06. 주문 이동(선택/전체/바로구매)
  * 07. 주문 생성/조회 헬퍼
  * 08. 주문 검색(책 제목)
+ * 09. 주문 제출 핸들러(admin-post)
  */
 
 if (!defined('ABSPATH')) exit;
@@ -527,3 +528,104 @@ if (!function_exists('shop_orders_find_by_book_title')) {
     return $hits;
   }
 }
+
+
+/*
+ * 09. 주문 제출 핸들러(admin-post)
+ * order.php 폼이 /wp-admin/admin-post.php 로 POST하면 여기서 처리
+ * 비로그인/로그인 모두 가능하도록 nopriv + 로그인 훅 두 개 연결
+ */
+function handle_place_order() {
+  // --- 디버깅 로그 (wp-content/order-debug.log 시도, 실패 시 시스템 temp로 폴백)
+  @ini_set('log_errors','1');
+  @ini_set('error_reporting', E_ALL);
+  if (defined('ABSPATH')) {
+    @ini_set('error_log', ABSPATH . 'wp-content/order-debug.log');
+  }
+  if (!file_exists(ABSPATH . 'wp-content/order-debug.log')) {
+    $fallback = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'order-debug.log';
+    @ini_set('error_log', $fallback);
+  }
+  error_log('[ORDER] handler start method=' . ($_SERVER['REQUEST_METHOD'] ?? ''));
+  if (!session_id()) { session_start(); }
+
+  // 1) 안전 가드: 반드시 POST + 유효한 nonce
+  if ( ('POST' !== ($_SERVER['REQUEST_METHOD'] ?? 'GET')) ) {
+    error_log('[ORDER] not POST -> redirect home');
+    wp_safe_redirect( home_url('/') ); exit;
+  }
+  if ( !isset($_POST['order_nonce']) || !wp_verify_nonce($_POST['order_nonce'], 'order_submit') ) {
+    error_log('[ORDER] nonce fail -> redirect home');
+    wp_safe_redirect( home_url('/') ); exit;
+  }
+
+  // 2) 장바구니/선택주문 소스 결정
+  $cart_session = function_exists('book_cart_get')  ? book_cart_get()  : [];
+  $order_set    = function_exists('order_items_get')? order_items_get(): [];
+  $cart_source  = !empty($order_set) ? $order_set : $cart_session;
+  error_log('[ORDER] cart_source_count=' . (is_array($cart_source) ? count($cart_source) : 0));
+  if (empty($cart_source)) { wp_safe_redirect( get_cart_url() ); exit; }
+
+  // 3) 합계 계산
+  $subtotal = 0; $discount_total = 0; $shipping_fee = 0; $coupon_discount = 0; $point_use = 0;
+  foreach ($cart_source as $book_id => $qty) {
+    $qty      = (int) $qty;
+    $regular  = (float) preg_replace('/[^\d.]/', '', (string) get_field('price', $book_id));
+    $sale_raw = get_field('discount_price', $book_id);
+    if ($sale_raw === '' || $sale_raw === null) { $sale_raw = get_field('sale_price', $book_id); }
+    $sale     = (float) preg_replace('/[^\d.]/', '', (string) $sale_raw);
+    $unit     = ($sale > 0 && $sale < $regular) ? $sale : $regular;
+
+    $subtotal       += $unit * $qty;
+    $discount_total += max(0, ($regular - $unit)) * $qty;
+  }
+  $total = max(0, $subtotal + $shipping_fee - $discount_total - $coupon_discount - $point_use);
+
+  // 4) 고객 정보
+  $customer = [
+    'name'     => sanitize_text_field($_POST['name'] ?? ''),
+    'email'    => sanitize_email($_POST['email'] ?? ''),
+    'phone'    => sanitize_text_field($_POST['phone'] ?? ''),
+    'postcode' => sanitize_text_field($_POST['postcode'] ?? ''),
+    'road'     => sanitize_text_field($_POST['road_address'] ?? ''),
+    'jibun'    => sanitize_text_field($_POST['jibun_address'] ?? ''),
+    'extra'    => sanitize_text_field($_POST['extra_address'] ?? ''),
+    'detail'   => sanitize_text_field($_POST['address_detail'] ?? ''),
+    'memo'     => sanitize_text_field($_POST['memo'] ?? ''),
+  ];
+
+  // 5) 저장
+  $order_id = 0;
+  if (function_exists('shop_order_create')) {
+    $order_id = shop_order_create([
+      'customer' => $customer,
+      'items'    => array_map('intval', $cart_source),
+      'amounts'  => [
+        'subtotal'       => $subtotal,
+        'discount_total' => $discount_total,
+        'shipping'       => $shipping_fee,
+        'coupon'         => $coupon_discount,
+        'points'         => $point_use,
+        'total'          => $total,
+      ],
+    ]);
+  }
+  error_log('[ORDER] created order_id=' . (int)$order_id);
+
+  // 6) 선택/바로구매 세션 정리
+  if (function_exists('order_items_clear')) { order_items_clear(); }
+
+  // 7) 완료 페이지로 이동
+  $complete    = get_page_by_path('order-complete');
+  $complete_url= $complete ? get_permalink($complete->ID) : home_url('/order-complete/');
+  if (!empty($order_id)) {
+    $complete_url = add_query_arg('order_id', (int)$order_id, $complete_url);
+  }
+  error_log('[ORDER] redirect_to=' . $complete_url);
+
+  wp_safe_redirect( esc_url_raw($complete_url), 303 );
+  exit;
+}
+add_action('admin_post_nopriv_place_order', 'handle_place_order'); // 비로그인
+add_action('admin_post_place_order',        'handle_place_order'); // 로그인
+

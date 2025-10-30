@@ -7,8 +7,8 @@
   <p class="section-desc">이 달의 추천 도서!</p>
 
 <?php
-// 1) 특정 카테고(bestseller/new/discount)를 제리외할 준비
-//    이 세 카테고리에 속하지 않은 일반 글들만 뿌릴 목적
+// 특정 카테고리(bestseller/new/discount)를 제리외할 준비
+//  이 세 카테고리에 속하지 않은 일반 글들만 뿌릴 목적
 $categories = ['bestseller', 'new', 'discount']; // 제외할 카테고리 슬러그들
 $exclude_ids = [];                                // 제외할 카테고리의 term_id를 담을 배열
 foreach ($categories as $slug) {
@@ -16,10 +16,10 @@ foreach ($categories as $slug) {
   if ($cat) $exclude_ids[] = $cat->term_id;      // 있으면 term_id를 제외 목록에 추가
 }
 
-// 2) 메인 쿼리 설정
-//    - post_type: 'post' (일반 글)
-//    - posts_per_page: -1 (모든 글)  ※ 현재 구조 설명용
-//    - category__not_in: 위에서 구한 제외 카테고리들
+// 메인 쿼리 설정
+// post_type: 'post' (일반 글)
+// posts_per_page: -1 (모든 글) 현재 구조 설명용
+// category__not_in: 위에서 구한 제외 카테고리들
 $args = [
   'post_type' => 'post',
   'posts_per_page' => -1,
@@ -30,8 +30,8 @@ $loop = new WP_Query($args); // 커스텀 루프 시작
 
   <div class="book-grid">
     <?php if ($loop->have_posts()) : while ($loop->have_posts()) : $loop->the_post(); 
-      // 3) 각 글의 본문을 Gutenberg 블록 단위로 파싱
-      //    "첫 번째 문단"과 "첫 번째 인용"을 찾아 카드 앞/뒤면에 배치
+      // 각 글의 본문을 Gutenberg 블록 단위로 파싱
+      // 첫 번째 문단과 첫 번째 인용을 찾아 카드 앞/뒤면에 배치
       $blocks = parse_blocks(get_the_content()); // 현재 글의 콘텐츠를 블록 배열로 변환
       $paragraph = '';                           // 첫 문단 블록 HTML을 담을 변수
       $quote = '';                               // 첫 인용 블록 HTML을 담을 변수
@@ -50,11 +50,11 @@ $loop = new WP_Query($args); // 커스텀 루프 시작
         if ($paragraph && $quote) break; 
       }
     ?>
-      <!-- 4) 카드 컴포넌트
-              - .book-card: 카드 1개 컨테이너
-              - .book-inner: 앞/뒤면을 감싸는 래퍼(뒤집힘 애니메이션용)
-              - .book-front: 앞면(썸네일, 제목, 첫 문단)
-              - .book-back:  뒷면(첫 인용 블록) -->
+      <!-- 카드 컴포넌트
+        .book-card: 카드 1개 컨테이너
+        .book-inner: 앞/뒤면을 감싸는 래퍼(뒤집힘 애니메이션용)
+        .book-front: 앞면(썸네일, 제목, 첫 문단)
+        .book-back:  뒷면(첫 인용 블록) -->
       <article class="book-card">
         <div class="book-inner">
           <div class="book-front">
@@ -86,10 +86,10 @@ $loop = new WP_Query($args); // 커스텀 루프 시작
 
 <script>
 /* 
-   5) 모바일 전용 카드 인터랙션 스크립트
-      - 화면 너비 768px 이하에서만 활성화
-      - 카드 클릭 시 .touched 클래스를 토글해 앞/뒤면 전환
-      - 다른 카드가 열려 있으면 닫고, 바깥 영역 클릭 시 모두 닫음
+   모바일 전용 카드 인터랙션 스크립트
+  화면 너비 768px 이하에서만 활성화
+  카드 클릭 시 .touched 클래스를 토글해 앞/뒤면 전환
+  다른 카드가 열려 있으면 닫고 바깥 영역 클릭 시 모두 닫음
  */
 document.addEventListener("DOMContentLoaded", function () {
   if (window.innerWidth <= 768) {
